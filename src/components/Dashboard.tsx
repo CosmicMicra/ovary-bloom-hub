@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -12,11 +15,13 @@ import {
   Zap,
   Calendar,
   Plus,
-  Download
+  Download,
+  Loader2
 } from "lucide-react";
 import jsPDF from 'jspdf';
 
 export const Dashboard = () => {
+  const { toast } = useToast();
   const [symptoms, setSymptoms] = useState({
     acneDays: 2,
     sleepQuality: 7,
@@ -24,6 +29,25 @@ export const Dashboard = () => {
     weight: 65,
     mood: 6
   });
+
+  const [formData, setFormData] = useState({
+    Pregnancies: '',
+    Glucose: '',
+    BloodPressure: '',
+    SkinThickness: '',
+    Insulin: '',
+    BMI: '',
+    DiabetesPedigreeFunction: '',
+    Age: ''
+  });
+
+  const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [predictionResult, setPredictionResult] = useState<{
+    severity: string;
+    insights: string;
+    score: number;
+  } | null>(null);
 
   // Calculate PCOD Severity Score (simplified algorithm)
   const calculateSeverityScore = () => {
@@ -49,6 +73,70 @@ export const Dashboard = () => {
   };
 
   const scoreBadge = getScoreBadge(severityScore);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('https://a5c2a0f63c37.ngrok-free.app/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        },
+        body: JSON.stringify({
+          Pregnancies: Number(formData.Pregnancies),
+          Glucose: Number(formData.Glucose),
+          BloodPressure: Number(formData.BloodPressure),
+          SkinThickness: Number(formData.SkinThickness),
+          Insulin: Number(formData.Insulin),
+          BMI: Number(formData.BMI),
+          DiabetesPedigreeFunction: Number(formData.DiabetesPedigreeFunction),
+          Age: Number(formData.Age)
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get prediction');
+      }
+
+      const result = await response.json();
+      
+      // Assuming the API returns { prediction: number, severity: string, insights: string }
+      const severity = result.prediction === 1 ? 'High Risk' : 'Low Risk';
+      const score = result.prediction === 1 ? 30 : 80; // Update severity score based on prediction
+      
+      setPredictionResult({
+        severity,
+        insights: result.insights || `Based on your symptoms, you are classified as ${severity}. Continue monitoring your health.`,
+        score
+      });
+
+      // Update the symptoms state with the new score
+      setSymptoms(prev => ({ ...prev, mood: score / 10 }));
+
+      toast({
+        title: "Prediction Complete",
+        description: `Your PCOD risk assessment shows: ${severity}`,
+      });
+
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get prediction. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const generatePDFReport = () => {
     const doc = new jsPDF();
@@ -258,6 +346,12 @@ export const Dashboard = () => {
             <p className="text-sm text-muted-foreground">
               Based on your recent symptoms, sleep, exercise, and mood tracking
             </p>
+            {predictionResult && (
+              <div className="mt-4 p-3 bg-primary/10 rounded-soft">
+                <h4 className="font-semibold text-primary mb-2">Latest Assessment: {predictionResult.severity}</h4>
+                <p className="text-sm text-muted-foreground">{predictionResult.insights}</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -328,7 +422,11 @@ export const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" className="rounded-soft h-auto p-4 flex flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="rounded-soft h-auto p-4 flex flex-col gap-2"
+              onClick={() => setShowForm(!showForm)}
+            >
               <Plus className="h-4 w-4" />
               <span className="text-xs">Log Symptoms</span>
             </Button>
@@ -347,6 +445,140 @@ export const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Symptom Logging Form */}
+      {showForm && (
+        <Card className="rounded-gentle">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-primary" />
+              Log Symptoms for PCOD Assessment
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleFormSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="pregnancies">Number of Pregnancies</Label>
+                  <Input
+                    id="pregnancies"
+                    type="number"
+                    value={formData.Pregnancies}
+                    onChange={(e) => handleInputChange('Pregnancies', e.target.value)}
+                    placeholder="0"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="glucose">Glucose Level (mg/dL)</Label>
+                  <Input
+                    id="glucose"
+                    type="number"
+                    value={formData.Glucose}
+                    onChange={(e) => handleInputChange('Glucose', e.target.value)}
+                    placeholder="100"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="bloodpressure">Blood Pressure (mmHg)</Label>
+                  <Input
+                    id="bloodpressure"
+                    type="number"
+                    value={formData.BloodPressure}
+                    onChange={(e) => handleInputChange('BloodPressure', e.target.value)}
+                    placeholder="80"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="skinthickness">Skin Thickness (mm)</Label>
+                  <Input
+                    id="skinthickness"
+                    type="number"
+                    value={formData.SkinThickness}
+                    onChange={(e) => handleInputChange('SkinThickness', e.target.value)}
+                    placeholder="20"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="insulin">Insulin Level (μU/mL)</Label>
+                  <Input
+                    id="insulin"
+                    type="number"
+                    value={formData.Insulin}
+                    onChange={(e) => handleInputChange('Insulin', e.target.value)}
+                    placeholder="80"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="bmi">BMI</Label>
+                  <Input
+                    id="bmi"
+                    type="number"
+                    step="0.1"
+                    value={formData.BMI}
+                    onChange={(e) => handleInputChange('BMI', e.target.value)}
+                    placeholder="25.0"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="pedigree">Diabetes Pedigree Function</Label>
+                  <Input
+                    id="pedigree"
+                    type="number"
+                    step="0.001"
+                    value={formData.DiabetesPedigreeFunction}
+                    onChange={(e) => handleInputChange('DiabetesPedigreeFunction', e.target.value)}
+                    placeholder="0.5"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="age">Age</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    value={formData.Age}
+                    onChange={(e) => handleInputChange('Age', e.target.value)}
+                    placeholder="25"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="flex-1"
+                >
+                  {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Get PCOD Risk Assessment
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowForm(false)}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Weekly Trends */}
       <Card className="rounded-gentle">

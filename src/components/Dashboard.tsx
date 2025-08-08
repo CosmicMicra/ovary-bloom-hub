@@ -78,12 +78,16 @@ export const Dashboard = () => {
     setIsLoading(true);
 
     try {
+      console.log('Submitting form data:', formData);
+      
       const response = await fetch('https://a5c2a0f63c37.ngrok-free.app/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
+          'ngrok-skip-browser-warning': 'true',
+          'Access-Control-Allow-Origin': '*'
         },
+        mode: 'cors',
         body: JSON.stringify({
           age: Number(formData.age),
           bmi: Number(formData.bmi),
@@ -95,11 +99,14 @@ export const Dashboard = () => {
         })
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to get prediction');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log('API Response:', result);
       
       // Map severity to score
       const severityToScore = {
@@ -127,14 +134,50 @@ export const Dashboard = () => {
       setShowForm(false);
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast({
-        title: "Error",
-        description: "Failed to get prediction. Please try again.",
-        variant: "destructive"
+      
+      // Fallback: Create a mock prediction based on form data for demo purposes
+      const mockSeverity = getMockSeverity();
+      const mockScore = mockSeverity === 'High' ? 30 : mockSeverity === 'Medium' ? 60 : 85;
+      
+      setPredictionResult({
+        severity: mockSeverity,
+        insights: `Demo Mode: Based on your inputs, your PCOD severity appears to be ${mockSeverity}. ${mockSeverity === 'High' ? 'Consider consulting your doctor.' : mockSeverity === 'Medium' ? 'Maintain healthy habits.' : 'Keep up the good work!'}`,
+        score: mockScore
       });
+
+      setSymptoms(prev => ({ ...prev, mood: mockScore / 10 }));
+
+      toast({
+        title: "Assessment Complete (Demo Mode)",
+        description: `API unavailable. Using demo prediction: ${mockSeverity} severity`,
+        variant: "default"
+      });
+
+      setShowForm(false);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getMockSeverity = () => {
+    // Simple mock logic based on form inputs
+    const age = Number(formData.age) || 0;
+    const bmi = Number(formData.bmi) || 0;
+    const acneDays = Number(formData.acne_days) || 0;
+    const exercise = Number(formData.exercise) || 0;
+    const sleepQuality = Number(formData.sleep_quality) || 0;
+
+    let riskScore = 0;
+    
+    if (age > 35) riskScore += 1;
+    if (bmi > 25) riskScore += 1;
+    if (acneDays > 4) riskScore += 1;
+    if (exercise < 30) riskScore += 1;
+    if (sleepQuality < 6) riskScore += 1;
+
+    if (riskScore >= 4) return 'High';
+    if (riskScore >= 2) return 'Medium';
+    return 'Low';
   };
 
   const handleInputChange = (field: string, value: string) => {

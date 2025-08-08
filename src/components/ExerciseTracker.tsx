@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Check, 
   Flame, 
@@ -9,7 +10,8 @@ import {
   Clock,
   Trophy,
   Coins,
-  Star
+  Star,
+  X
 } from "lucide-react";
 
 interface ExerciseDay {
@@ -23,6 +25,10 @@ interface ExerciseDay {
 export const ExerciseTracker = () => {
   const [streak, setStreak] = useState(4);
   const [totalCoins, setTotalCoins] = useState(120);
+  const [selectedDay, setSelectedDay] = useState<ExerciseDay | null>(null);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
+  const [currentVideoId, setCurrentVideoId] = useState("");
+  const [currentVideoTitle, setCurrentVideoTitle] = useState("");
   
   const [exerciseDays, setExerciseDays] = useState<ExerciseDay[]>([
     { day: 1, completed: true, current: false, coins: 15, videoId: "--jhKVdZOJM" },
@@ -53,6 +59,23 @@ export const ExerciseTracker = () => {
       
       return updated;
     });
+  };
+
+  const handleDayClick = (day: ExerciseDay) => {
+    setSelectedDay(day);
+  };
+
+  const startExercise = (videoId: string, title: string) => {
+    setCurrentVideoId(videoId);
+    setCurrentVideoTitle(title);
+    setIsVideoDialogOpen(true);
+    setSelectedDay(null);
+  };
+
+  const startWeeklyChallenge = () => {
+    setCurrentVideoId("yB6DFubjzq0");
+    setCurrentVideoTitle("Weekly PCOD Challenge");
+    setIsVideoDialogOpen(true);
   };
 
   const exercises = [
@@ -132,8 +155,9 @@ export const ExerciseTracker = () => {
               {exerciseDays.map((day) => (
                 <div key={day.day} className="flex flex-col items-center">
                   <div
+                    onClick={() => handleDayClick(day)}
                     className={`
-                      timeline-dot w-16 h-16 rounded-full flex items-center justify-center text-sm font-semibold
+                      timeline-dot w-16 h-16 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer hover:scale-105 transition-transform
                       ${day.completed ? 'completed' : day.current ? 'current' : 'upcoming'}
                     `}
                   >
@@ -169,6 +193,60 @@ export const ExerciseTracker = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Day Selection Dialog */}
+      {selectedDay && (
+        <Dialog open={!!selectedDay} onOpenChange={() => setSelectedDay(null)}>
+          <DialogContent className="rounded-gentle">
+            <DialogHeader>
+              <DialogTitle>Day {selectedDay.day} Exercise</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-muted-foreground">
+                {selectedDay.completed 
+                  ? "Great job! You've completed this day's exercise. Want to do it again?"
+                  : selectedDay.current
+                  ? "Ready to start today's exercise?"
+                  : "This exercise will be unlocked when you complete the previous days."
+                }
+              </p>
+              <div className="flex items-center gap-2">
+                <Coins className="h-4 w-4 text-warning" />
+                <span className="text-sm">Earn {selectedDay.coins} coins</span>
+              </div>
+              <Button 
+                onClick={() => startExercise(selectedDay.videoId, `Day ${selectedDay.day} Exercise`)}
+                className="w-full rounded-soft"
+                disabled={!selectedDay.completed && !selectedDay.current}
+              >
+                <Play className="h-4 w-4 mr-2" />
+                Start Exercise
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Video Player Dialog */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <DialogContent className="max-w-4xl rounded-gentle">
+          <DialogHeader>
+            <DialogTitle>{currentVideoTitle}</DialogTitle>
+          </DialogHeader>
+          <div className="aspect-video">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1`}
+              title={currentVideoTitle}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full rounded-soft"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Today's Exercise */}
       <Card className="rounded-gentle">
@@ -211,7 +289,7 @@ export const ExerciseTracker = () => {
                     <Button 
                       size="sm" 
                       className="w-full rounded-soft"
-                      onClick={index === 0 ? completeCurrentDay : undefined}
+                      onClick={() => startExercise(exercise.videoId, exercise.title)}
                     >
                       <Play className="h-3 w-3 mr-1" />
                       Start Exercise
@@ -239,6 +317,22 @@ export const ExerciseTracker = () => {
             <div className="flex items-center gap-2">
               <Star className="h-5 w-5 text-warning" />
               <span className="font-semibold text-warning">50 bonus coins</span>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Button 
+              onClick={startWeeklyChallenge}
+              className="rounded-soft"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Start Weekly Challenge
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
             </div>
           </div>
         </CardContent>

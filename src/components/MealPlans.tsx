@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { 
   Apple, 
   Clock, 
@@ -11,7 +13,8 @@ import {
   Leaf,
   ChefHat,
   BookOpen,
-  Star
+  Star,
+  X
 } from "lucide-react";
 
 interface Recipe {
@@ -30,6 +33,7 @@ interface Recipe {
 
 export const MealPlans = () => {
   const [selectedCategory, setSelectedCategory] = useState("breakfast");
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   const recipes: Recipe[] = [
     {
@@ -156,6 +160,10 @@ export const MealPlans = () => {
     }
   };
 
+  const openRecipeDialog = (recipe: Recipe) => {
+    setSelectedRecipe(recipe);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -280,8 +288,9 @@ export const MealPlans = () => {
                       {/* Actions */}
                       <div className="flex gap-2 pt-2">
                         <Button size="sm" className="flex-1 rounded-soft">
+                          onClick={() => openRecipeDialog(recipe)}
                           <BookOpen className="h-3 w-3 mr-1" />
-                          View Recipe
+                          Get Recipe
                         </Button>
                         <Button size="sm" variant="outline" className="rounded-soft">
                           <Heart className="h-3 w-3" />
@@ -295,6 +304,93 @@ export const MealPlans = () => {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Recipe Details Dialog */}
+      <Dialog open={!!selectedRecipe} onOpenChange={() => setSelectedRecipe(null)}>
+        <DialogContent className="max-w-2xl rounded-gentle max-h-[80vh] overflow-y-auto">
+          {selectedRecipe && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl">{selectedRecipe.title}</DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                {/* Recipe Image Placeholder */}
+                <div className="aspect-video bg-muted rounded-soft overflow-hidden flex items-center justify-center">
+                  <ChefHat className="h-16 w-16 text-muted-foreground" />
+                </div>
+
+                {/* Recipe Meta */}
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {selectedRecipe.cookTime}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    {selectedRecipe.servings} servings
+                  </div>
+                  <Badge className={`text-xs rounded-soft ${getDifficultyColor(selectedRecipe.difficulty)}`}>
+                    {selectedRecipe.difficulty}
+                  </Badge>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 text-warning fill-current" />
+                    <span>{selectedRecipe.rating}</span>
+                  </div>
+                </div>
+
+                {/* Benefits */}
+                <div>
+                  <h3 className="font-semibold mb-2">Health Benefits</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedRecipe.benefits.map((benefit, index) => (
+                      <Badge key={index} variant="outline" className="text-xs rounded-soft">
+                        {benefit}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Description */}
+                <div>
+                  <h3 className="font-semibold mb-2">Instructions</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {selectedRecipe.description}
+                  </p>
+                </div>
+
+                <Separator />
+
+                {/* Ingredients */}
+                <div>
+                  <h3 className="font-semibold mb-3">Ingredients</h3>
+                  <ul className="space-y-2">
+                    {selectedRecipe.ingredients.map((ingredient, index) => (
+                      <li key={index} className="flex items-center gap-2 text-sm">
+                        <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                        {ingredient}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <Button className="flex-1 rounded-soft">
+                    <Heart className="h-4 w-4 mr-2" />
+                    Save Recipe
+                  </Button>
+                  <Button variant="outline" className="flex-1 rounded-soft">
+                    Share Recipe
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Meal Planning Tips */}
       <Card className="rounded-gentle">

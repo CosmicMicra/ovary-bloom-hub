@@ -31,14 +31,13 @@ export const Dashboard = () => {
   });
 
   const [formData, setFormData] = useState({
-    Pregnancies: '',
-    Glucose: '',
-    BloodPressure: '',
-    SkinThickness: '',
-    Insulin: '',
-    BMI: '',
-    DiabetesPedigreeFunction: '',
-    Age: ''
+    age: '',
+    bmi: '',
+    acne_days: '',
+    weight_gain: '',
+    hormone_level: '',
+    exercise: '',
+    sleep_quality: ''
   });
 
   const [showForm, setShowForm] = useState(false);
@@ -86,14 +85,13 @@ export const Dashboard = () => {
           'ngrok-skip-browser-warning': 'true'
         },
         body: JSON.stringify({
-          Pregnancies: Number(formData.Pregnancies),
-          Glucose: Number(formData.Glucose),
-          BloodPressure: Number(formData.BloodPressure),
-          SkinThickness: Number(formData.SkinThickness),
-          Insulin: Number(formData.Insulin),
-          BMI: Number(formData.BMI),
-          DiabetesPedigreeFunction: Number(formData.DiabetesPedigreeFunction),
-          Age: Number(formData.Age)
+          age: Number(formData.age),
+          bmi: Number(formData.bmi),
+          acne_days: Number(formData.acne_days),
+          weight_gain: Number(formData.weight_gain),
+          hormone_level: Number(formData.hormone_level),
+          exercise: Number(formData.exercise),
+          sleep_quality: Number(formData.sleep_quality)
         })
       });
 
@@ -103,13 +101,18 @@ export const Dashboard = () => {
 
       const result = await response.json();
       
-      // Assuming the API returns { prediction: number, severity: string, insights: string }
-      const severity = result.prediction === 1 ? 'High Risk' : 'Low Risk';
-      const score = result.prediction === 1 ? 30 : 80; // Update severity score based on prediction
+      // Map severity to score
+      const severityToScore = {
+        'High': 30,
+        'Medium': 60,
+        'Low': 85
+      };
+      
+      const score = severityToScore[result.severity_category as keyof typeof severityToScore] || 50;
       
       setPredictionResult({
-        severity,
-        insights: result.insights || `Based on your symptoms, you are classified as ${severity}. Continue monitoring your health.`,
+        severity: result.severity_category,
+        insights: result.insights,
         score
       });
 
@@ -117,8 +120,8 @@ export const Dashboard = () => {
       setSymptoms(prev => ({ ...prev, mood: score / 10 }));
 
       toast({
-        title: "Prediction Complete",
-        description: `Your PCOD risk assessment shows: ${severity}`,
+        title: "Assessment Complete",
+        description: `PCOD Severity: ${result.severity_category}`,
       });
 
       setShowForm(false);
@@ -459,61 +462,13 @@ export const Dashboard = () => {
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="pregnancies">Number of Pregnancies</Label>
+                  <Label htmlFor="age">Age</Label>
                   <Input
-                    id="pregnancies"
+                    id="age"
                     type="number"
-                    value={formData.Pregnancies}
-                    onChange={(e) => handleInputChange('Pregnancies', e.target.value)}
-                    placeholder="0"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="glucose">Glucose Level (mg/dL)</Label>
-                  <Input
-                    id="glucose"
-                    type="number"
-                    value={formData.Glucose}
-                    onChange={(e) => handleInputChange('Glucose', e.target.value)}
-                    placeholder="100"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="bloodpressure">Blood Pressure (mmHg)</Label>
-                  <Input
-                    id="bloodpressure"
-                    type="number"
-                    value={formData.BloodPressure}
-                    onChange={(e) => handleInputChange('BloodPressure', e.target.value)}
-                    placeholder="80"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="skinthickness">Skin Thickness (mm)</Label>
-                  <Input
-                    id="skinthickness"
-                    type="number"
-                    value={formData.SkinThickness}
-                    onChange={(e) => handleInputChange('SkinThickness', e.target.value)}
-                    placeholder="20"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="insulin">Insulin Level (μU/mL)</Label>
-                  <Input
-                    id="insulin"
-                    type="number"
-                    value={formData.Insulin}
-                    onChange={(e) => handleInputChange('Insulin', e.target.value)}
-                    placeholder="80"
+                    value={formData.age}
+                    onChange={(e) => handleInputChange('age', e.target.value)}
+                    placeholder="25"
                     required
                   />
                 </div>
@@ -524,34 +479,75 @@ export const Dashboard = () => {
                     id="bmi"
                     type="number"
                     step="0.1"
-                    value={formData.BMI}
-                    onChange={(e) => handleInputChange('BMI', e.target.value)}
+                    value={formData.bmi}
+                    onChange={(e) => handleInputChange('bmi', e.target.value)}
                     placeholder="25.0"
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="pedigree">Diabetes Pedigree Function</Label>
+                  <Label htmlFor="acne_days">Acne Days (per week)</Label>
                   <Input
-                    id="pedigree"
+                    id="acne_days"
                     type="number"
-                    step="0.001"
-                    value={formData.DiabetesPedigreeFunction}
-                    onChange={(e) => handleInputChange('DiabetesPedigreeFunction', e.target.value)}
-                    placeholder="0.5"
+                    value={formData.acne_days}
+                    onChange={(e) => handleInputChange('acne_days', e.target.value)}
+                    placeholder="3"
+                    min="0"
+                    max="7"
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
+                  <Label htmlFor="weight_gain">Weight Gain (kg in last 6 months)</Label>
                   <Input
-                    id="age"
+                    id="weight_gain"
                     type="number"
-                    value={formData.Age}
-                    onChange={(e) => handleInputChange('Age', e.target.value)}
-                    placeholder="25"
+                    value={formData.weight_gain}
+                    onChange={(e) => handleInputChange('weight_gain', e.target.value)}
+                    placeholder="2"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="hormone_level">Hormone Level (Scale 1-10)</Label>
+                  <Input
+                    id="hormone_level"
+                    type="number"
+                    value={formData.hormone_level}
+                    onChange={(e) => handleInputChange('hormone_level', e.target.value)}
+                    placeholder="5"
+                    min="1"
+                    max="10"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="exercise">Exercise (minutes per day)</Label>
+                  <Input
+                    id="exercise"
+                    type="number"
+                    value={formData.exercise}
+                    onChange={(e) => handleInputChange('exercise', e.target.value)}
+                    placeholder="30"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="sleep_quality">Sleep Quality (Scale 1-10)</Label>
+                  <Input
+                    id="sleep_quality"
+                    type="number"
+                    value={formData.sleep_quality}
+                    onChange={(e) => handleInputChange('sleep_quality', e.target.value)}
+                    placeholder="7"
+                    min="1"
+                    max="10"
                     required
                   />
                 </div>

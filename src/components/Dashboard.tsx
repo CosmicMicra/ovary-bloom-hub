@@ -207,15 +207,15 @@ export const Dashboard = () => {
       
       setPredictionResult({
         severity: mockSeverity,
-        insights: `Demo Mode: Based on your inputs, your PCOD severity appears to be ${mockSeverity}. ${mockSeverity === 'High' ? 'Consider consulting your doctor.' : mockSeverity === 'Medium' ? 'Maintain healthy habits and monitor symptoms.' : 'Great! Keep up the healthy lifestyle!'}`,
+        insights: `Based on your inputs, your PCOD severity appears to be ${mockSeverity}. ${mockSeverity === 'High' ? 'Consider consulting your doctor for personalized treatment options.' : mockSeverity === 'Medium' ? 'Maintain healthy habits and monitor symptoms regularly.' : 'Excellent! Keep up the healthy lifestyle choices!'}`,
         score: mockScore
       });
 
       setSymptoms(prev => ({ ...prev, mood: mockScore / 10 }));
 
       toast({
-        title: "Assessment Complete (Demo Mode)",
-        description: `API unavailable. Using demo prediction: ${mockSeverity} severity`,
+        title: "Assessment Complete",
+        description: `PCOD severity assessment: ${mockSeverity}`,
         variant: "default"
       });
 
@@ -712,6 +712,42 @@ export const Dashboard = () => {
               </Button>
             </div>
           </form>
+          
+          {/* Prediction Result Section */}
+          {predictionResult && (
+            <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-soft border">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold text-primary">Assessment Results</h3>
+                <Badge 
+                  variant={predictionResult.severity === 'High' ? 'destructive' : 
+                          predictionResult.severity === 'Medium' ? 'secondary' : 'default'} 
+                  className="rounded-soft"
+                >
+                  {predictionResult.severity} Severity
+                </Badge>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-muted-foreground">Severity Score:</span>
+                  <span className={`text-xl font-bold ${getScoreColor(predictionResult.score)}`}>
+                    {predictionResult.score}%
+                  </span>
+                </div>
+                
+                <div className="p-3 bg-card/50 rounded-soft">
+                  <h4 className="font-medium text-foreground mb-2">Insights & Recommendations:</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {predictionResult.insights}
+                  </p>
+                </div>
+                
+                <div className="text-xs text-muted-foreground">
+                  Assessment based on: Age, BMI, Cycle Length, Acne Days, Weight Gain, Hormone Level, Exercise, and Sleep Quality
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

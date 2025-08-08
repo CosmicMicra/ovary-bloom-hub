@@ -11,8 +11,10 @@ import {
   Scale,
   Zap,
   Calendar,
-  Plus
+  Plus,
+  Download
 } from "lucide-react";
+import jsPDF from 'jspdf';
 
 export const Dashboard = () => {
   const [symptoms, setSymptoms] = useState({
@@ -48,21 +50,91 @@ export const Dashboard = () => {
 
   const scoreBadge = getScoreBadge(severityScore);
 
+  const generatePDFReport = () => {
+    const doc = new jsPDF();
+    const currentDate = new Date().toLocaleDateString();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('PCOD Health Report', 20, 30);
+    
+    doc.setFontSize(12);
+    doc.text(`Patient: Jiya`, 20, 50);
+    doc.text(`Report Date: ${currentDate}`, 20, 60);
+    
+    // Overall Health Score
+    doc.setFontSize(16);
+    doc.text('Overall Health Assessment', 20, 80);
+    doc.setFontSize(12);
+    doc.text(`PCOD Severity Score: ${severityScore}% (${scoreBadge.label})`, 20, 95);
+    
+    // Current Symptoms
+    doc.setFontSize(14);
+    doc.text('Current Health Metrics', 20, 115);
+    doc.setFontSize(11);
+    doc.text(`• Acne Days This Week: ${symptoms.acneDays}/7 days`, 25, 130);
+    doc.text(`• Sleep Quality: ${symptoms.sleepQuality}/10`, 25, 140);
+    doc.text(`• Exercise Minutes Daily: ${symptoms.exerciseMinutes} minutes`, 25, 150);
+    doc.text(`• Current Weight: ${symptoms.weight} kg`, 25, 160);
+    doc.text(`• Mood Rating: ${symptoms.mood}/10`, 25, 170);
+    
+    // Weekly Trends
+    doc.setFontSize(14);
+    doc.text('Weekly Trends', 20, 190);
+    doc.setFontSize(11);
+    doc.text('• Sleep Quality: Improved by 15%', 25, 205);
+    doc.text('• Exercise: Increased by 20 minutes/day', 25, 215);
+    doc.text('• Acne Days: 2 days this week', 25, 225);
+    
+    // Recommendations
+    doc.setFontSize(14);
+    doc.text('Health Recommendations', 20, 245);
+    doc.setFontSize(11);
+    
+    if (severityScore < 60) {
+      doc.text('• Focus on consistent sleep schedule (7-9 hours)', 25, 260);
+      doc.text('• Increase physical activity to 30+ minutes daily', 25, 270);
+      doc.text('• Consider stress management techniques', 25, 280);
+    } else if (severityScore < 80) {
+      doc.text('• Maintain current healthy habits', 25, 260);
+      doc.text('• Continue regular exercise routine', 25, 270);
+      doc.text('• Monitor hormonal symptoms', 25, 280);
+    } else {
+      doc.text('• Excellent progress! Keep up the great work', 25, 260);
+      doc.text('• Continue current lifestyle habits', 25, 270);
+      doc.text('• Regular check-ups recommended', 25, 280);
+    }
+    
+    // Footer
+    doc.setFontSize(8);
+    doc.text('This report is generated from self-tracked data and should be discussed with your healthcare provider.', 20, 290);
+    
+    doc.save(`PCOD-Health-Report-${currentDate.replace(/\//g, '-')}.pdf`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
       <Card className="rounded-gentle bg-gradient-to-r from-primary/10 to-secondary/10 border-none">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1">
               <h2 className="text-2xl font-semibold text-foreground mb-2">
-                Welcome back! 👋
+                Welcome back, Jiya! 👋
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 Let's check how you're feeling today
               </p>
+              <Button 
+                onClick={generatePDFReport}
+                variant="outline" 
+                className="rounded-soft bg-card/50 hover:bg-card border-primary/20 hover:border-primary/40"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download Doctor's Report
+              </Button>
             </div>
-            <div className="text-center">
+            <div className="text-center ml-6">
               <div className="text-3xl font-bold mb-1">
                 <span className={getScoreColor(severityScore)}>
                   {severityScore}%

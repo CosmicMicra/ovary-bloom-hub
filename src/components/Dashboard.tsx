@@ -61,15 +61,15 @@ export const Dashboard = () => {
 
   const severityScore = 22; // Set to 22 as requested
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-success";
-    if (score >= 60) return "text-warning";
-    return "text-destructive";
+    if (score <= 30) return "text-success"; // Low severity = good (green)
+    if (score <= 60) return "text-warning"; // Medium severity = caution (orange)
+    return "text-destructive"; // High severity = bad (red)
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) return { label: "Excellent", variant: "default" as const };
-    if (score >= 60) return { label: "Good", variant: "secondary" as const };
-    return { label: "Needs Attention", variant: "destructive" as const };
+    if (score <= 30) return { label: "Healthy", variant: "default" as const };
+    if (score <= 60) return { label: "Monitor", variant: "secondary" as const };
+    return { label: "High Risk", variant: "destructive" as const };
   };
 
   const scoreBadge = getScoreBadge(severityScore);
@@ -110,11 +110,11 @@ export const Dashboard = () => {
       const result = await response.json();
       console.log('API Response:', result);
       
-      // Map severity to score
+      // Map severity to score (lower is better)
       const severityToScore = {
-        'High': 30,
-        'Medium': 60,
-        'Low': 85
+        'High': 80,    // High severity = high score (bad)
+        'Medium': 50,  // Medium severity = medium score
+        'Low': 20      // Low severity = low score (good)
       };
       
       const score = severityToScore[result.severity_category as keyof typeof severityToScore] || 50;
@@ -139,11 +139,11 @@ export const Dashboard = () => {
       
       // Fallback: Create a mock prediction based on form data for demo purposes
       const mockSeverity = getMockSeverity();
-      const mockScore = mockSeverity === 'High' ? 30 : mockSeverity === 'Medium' ? 60 : 85;
+      const mockScore = mockSeverity === 'High' ? 80 : mockSeverity === 'Medium' ? 50 : 20; // Lower = better
       
       setPredictionResult({
         severity: mockSeverity,
-        insights: `Demo Mode: Based on your inputs, your PCOD severity appears to be ${mockSeverity}. ${mockSeverity === 'High' ? 'Consider consulting your doctor.' : mockSeverity === 'Medium' ? 'Maintain healthy habits.' : 'Keep up the good work!'}`,
+        insights: `Demo Mode: Based on your inputs, your PCOD severity appears to be ${mockSeverity}. ${mockSeverity === 'High' ? 'Consider consulting your doctor.' : mockSeverity === 'Medium' ? 'Maintain healthy habits and monitor symptoms.' : 'Great! Keep up the healthy lifestyle!'}`,
         score: mockScore
       });
 
@@ -200,12 +200,12 @@ export const Dashboard = () => {
     // Sleep quality (poor sleep = higher severity)
     if (sleepQuality === 0) score += 10;
 
-    // Cap the score between 40 and 100
-    score = Math.min(100, Math.max(40, score));
+    // Cap the score between 10 and 90 (lower = better health)
+    score = Math.min(90, Math.max(10, score));
     
-    if (score >= 80) return 'High';
-    if (score >= 60) return 'Medium';
-    return 'Low';
+    if (score >= 70) return 'High';   // High severity (bad)
+    if (score >= 40) return 'Medium'; // Medium severity
+    return 'Low';                     // Low severity (good)
   };
 
   const handleInputChange = (field: string, value: string) => {

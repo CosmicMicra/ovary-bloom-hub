@@ -59,7 +59,7 @@ export const Dashboard = () => {
     return Math.round((acneScore + sleepScore + exerciseScore + moodScore) / 4 * 10);
   };
 
-  const severityScore = calculateSeverityScore();
+  const severityScore = 22; // Set to 22 as requested
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-success";
     if (score >= 60) return "text-warning";

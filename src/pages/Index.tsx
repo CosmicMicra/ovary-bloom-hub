@@ -13,13 +13,19 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            PCOD Care
-          </h1>
-          <p className="text-muted-foreground">
-            Your personalized journey to better health
-          </p>
+        <div className="relative text-center mb-8">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-3xl opacity-50 rounded-full"></div>
+          <div className="relative">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-primary mb-3 animate-pulse">
+              NOVA
+            </h1>
+            <div className="text-lg md:text-xl font-semibold text-primary/80 mb-2 tracking-wide">
+              PCOD Care App
+            </div>
+            <p className="text-muted-foreground text-sm md:text-base">
+              Your personalized journey to better health ✨
+            </p>
+          </div>
         </div>
 
         {/* Main Tabs */}

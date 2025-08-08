@@ -17,6 +17,7 @@ interface ExerciseDay {
   completed: boolean;
   current: boolean;
   coins: number;
+  videoId: string;
 }
 
 export const ExerciseTracker = () => {
@@ -24,13 +25,13 @@ export const ExerciseTracker = () => {
   const [totalCoins, setTotalCoins] = useState(120);
   
   const [exerciseDays, setExerciseDays] = useState<ExerciseDay[]>([
-    { day: 1, completed: true, current: false, coins: 15 },
-    { day: 2, completed: true, current: false, coins: 20 },
-    { day: 3, completed: true, current: false, coins: 15 },
-    { day: 4, completed: true, current: false, coins: 25 },
-    { day: 5, completed: false, current: true, coins: 20 },
-    { day: 6, completed: false, current: false, coins: 20 },
-    { day: 7, completed: false, current: false, coins: 30 },
+    { day: 1, completed: true, current: false, coins: 15, videoId: "--jhKVdZOJM" },
+    { day: 2, completed: true, current: false, coins: 20, videoId: "v7AYKMP6rOE" },
+    { day: 3, completed: true, current: false, coins: 15, videoId: "4C-gxOE0j7s" },
+    { day: 4, completed: true, current: false, coins: 25, videoId: "7KGZnS1rS9A" },
+    { day: 5, completed: false, current: true, coins: 20, videoId: "8oFpcJMK3wE" },
+    { day: 6, completed: false, current: false, coins: 20, videoId: "UItWltVZZmE" },
+    { day: 7, completed: false, current: false, coins: 30, videoId: "MLY3n5UoVqg" },
   ]);
 
   const completeCurrentDay = () => {
@@ -57,24 +58,24 @@ export const ExerciseTracker = () => {
   const exercises = [
     {
       title: "PCOD Yoga Flow",
-      duration: "15 min",
-      difficulty: "Beginner",
-      benefits: "Reduces stress, improves circulation",
-      videoId: "yoga-flow"
-    },
-    {
-      title: "Core Strengthening",
-      duration: "12 min", 
-      difficulty: "Intermediate",
-      benefits: "Strengthens core, improves posture",
-      videoId: "core-strength"
-    },
-    {
-      title: "Cardio Walk",
       duration: "20 min",
       difficulty: "Beginner",
+      benefits: "Reduces stress, improves circulation",
+      videoId: "Y2eJb6L6LhE"
+    },
+    {
+      title: "Zumba Dance Workout",
+      duration: "20 min", 
+      difficulty: "Intermediate",
       benefits: "Boosts metabolism, improves mood",
-      videoId: "cardio-walk"
+      videoId: "FPfQMVf4vwQ"
+    },
+    {
+      title: "Yoga & Stretching",
+      duration: "20 min",
+      difficulty: "Beginner",
+      benefits: "Flexibility and stress relief",
+      videoId: "fq5EdfX2HqY"
     }
   ];
 
@@ -180,8 +181,17 @@ export const ExerciseTracker = () => {
               <Card key={index} className="rounded-soft border-border/50 hover:border-primary/50 transition-colors">
                 <CardContent className="p-4">
                   <div className="space-y-3">
-                    <div className="aspect-video bg-muted rounded-soft flex items-center justify-center">
-                      <Play className="h-8 w-8 text-muted-foreground" />
+                    <div className="aspect-video bg-muted rounded-soft overflow-hidden">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src={`https://www.youtube.com/embed/${exercise.videoId}`}
+                        title={exercise.title}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full"
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">{exercise.title}</h3>

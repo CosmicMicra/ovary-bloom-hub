@@ -84,21 +84,21 @@ export const ExerciseTracker = () => {
       duration: "20 min",
       difficulty: "Beginner",
       benefits: "Reduces stress, improves circulation",
-      videoId: "Y2eJb6L6LhE"
+      videoId: "yB6DFubjzq0"
     },
     {
       title: "Zumba Dance Workout",
       duration: "20 min", 
       difficulty: "Intermediate",
       benefits: "Boosts metabolism, improves mood",
-      videoId: "FPfQMVf4vwQ"
+      videoId: "yB6DFubjzq0"
     },
     {
       title: "Yoga & Stretching",
       duration: "20 min",
       difficulty: "Beginner",
       benefits: "Flexibility and stress relief",
-      videoId: "fq5EdfX2HqY"
+      videoId: "yB6DFubjzq0"
     }
   ];
 

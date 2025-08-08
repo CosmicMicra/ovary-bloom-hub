@@ -31,16 +31,17 @@ export const Dashboard = () => {
   });
 
   const [formData, setFormData] = useState({
-    age: '',
-    bmi: '',
-    acne_days: '',
-    weight_gain: '',
-    hormone_level: '',
-    exercise: '',
-    sleep_quality: ''
+    Age: '',
+    BMI: '',
+    CycleLength: '',
+    AcneDays: '',
+    WeightGain: '',
+    HormoneLevel: '',
+    ExerciseToday: '',
+    SleepQuality: ''
   });
 
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(true); // Always show form
   const [isLoading, setIsLoading] = useState(false);
   const [predictionResult, setPredictionResult] = useState<{
     severity: string;
@@ -89,13 +90,14 @@ export const Dashboard = () => {
         },
         mode: 'cors',
         body: JSON.stringify({
-          age: Number(formData.age),
-          bmi: Number(formData.bmi),
-          acne_days: Number(formData.acne_days),
-          weight_gain: Number(formData.weight_gain),
-          hormone_level: Number(formData.hormone_level),
-          exercise: Number(formData.exercise),
-          sleep_quality: Number(formData.sleep_quality)
+          Age: Number(formData.Age),
+          BMI: Number(formData.BMI),
+          CycleLength: Number(formData.CycleLength),
+          AcneDays: Number(formData.AcneDays),
+          WeightGain: Number(formData.WeightGain),
+          HormoneLevel: Number(formData.HormoneLevel),
+          ExerciseToday: Number(formData.ExerciseToday),
+          SleepQuality: Number(formData.SleepQuality)
         })
       });
 
@@ -160,23 +162,49 @@ export const Dashboard = () => {
   };
 
   const getMockSeverity = () => {
-    // Simple mock logic based on form inputs
-    const age = Number(formData.age) || 0;
-    const bmi = Number(formData.bmi) || 0;
-    const acneDays = Number(formData.acne_days) || 0;
-    const exercise = Number(formData.exercise) || 0;
-    const sleepQuality = Number(formData.sleep_quality) || 0;
+    // Simple mock logic based on form inputs using your dataset patterns
+    const age = Number(formData.Age) || 0;
+    const bmi = Number(formData.BMI) || 0;
+    const cycleLength = Number(formData.CycleLength) || 0;
+    const acneDays = Number(formData.AcneDays) || 0;
+    const weightGain = Number(formData.WeightGain) || 0;
+    const hormoneLevel = Number(formData.HormoneLevel) || 0;
+    const exercise = Number(formData.ExerciseToday) || 0;
+    const sleepQuality = Number(formData.SleepQuality) || 0;
 
-    let riskScore = 0;
+    // Calculate a mock severity score based on your dataset patterns
+    let score = 50; // base score
     
-    if (age > 35) riskScore += 1;
-    if (bmi > 25) riskScore += 1;
-    if (acneDays > 4) riskScore += 1;
-    if (exercise < 30) riskScore += 1;
-    if (sleepQuality < 6) riskScore += 1;
+    // Age factor (younger or older can increase risk)
+    if (age < 20 || age > 40) score += 5;
+    
+    // BMI factor
+    if (bmi > 30) score += 10;
+    else if (bmi > 25) score += 5;
+    
+    // Cycle length (irregular cycles)
+    if (cycleLength > 35 || cycleLength < 21) score += 10;
+    
+    // Acne days (more acne = higher severity)
+    score += acneDays * 2;
+    
+    // Weight gain
+    if (weightGain > 0) score += 5;
+    
+    // Hormone level (higher = more severity)
+    score += hormoneLevel;
+    
+    // Exercise (less exercise = higher severity)
+    if (exercise === 0) score += 10;
+    
+    // Sleep quality (poor sleep = higher severity)
+    if (sleepQuality === 0) score += 10;
 
-    if (riskScore >= 4) return 'High';
-    if (riskScore >= 2) return 'Medium';
+    // Cap the score between 40 and 100
+    score = Math.min(100, Math.max(40, score));
+    
+    if (score >= 80) return 'High';
+    if (score >= 60) return 'Medium';
     return 'Low';
   };
 
@@ -471,10 +499,10 @@ export const Dashboard = () => {
             <Button 
               variant="outline" 
               className="rounded-soft h-auto p-4 flex flex-col gap-2"
-              onClick={() => setShowForm(!showForm)}
+              disabled
             >
               <Plus className="h-4 w-4" />
-              <span className="text-xs">Log Symptoms</span>
+              <span className="text-xs">Form Always Open</span>
             </Button>
             <Button variant="outline" className="rounded-soft h-auto p-4 flex flex-col gap-2">
               <Moon className="h-4 w-4" />
@@ -492,132 +520,136 @@ export const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Symptom Logging Form */}
-      {showForm && (
-        <Card className="rounded-gentle">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5 text-primary" />
-              Log Symptoms for PCOD Assessment
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    value={formData.age}
-                    onChange={(e) => handleInputChange('age', e.target.value)}
-                    placeholder="25"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="bmi">BMI</Label>
-                  <Input
-                    id="bmi"
-                    type="number"
-                    step="0.1"
-                    value={formData.bmi}
-                    onChange={(e) => handleInputChange('bmi', e.target.value)}
-                    placeholder="25.0"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="acne_days">Acne Days (per week)</Label>
-                  <Input
-                    id="acne_days"
-                    type="number"
-                    value={formData.acne_days}
-                    onChange={(e) => handleInputChange('acne_days', e.target.value)}
-                    placeholder="3"
-                    min="0"
-                    max="7"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="weight_gain">Weight Gain (kg in last 6 months)</Label>
-                  <Input
-                    id="weight_gain"
-                    type="number"
-                    value={formData.weight_gain}
-                    onChange={(e) => handleInputChange('weight_gain', e.target.value)}
-                    placeholder="2"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="hormone_level">Hormone Level (Scale 1-10)</Label>
-                  <Input
-                    id="hormone_level"
-                    type="number"
-                    value={formData.hormone_level}
-                    onChange={(e) => handleInputChange('hormone_level', e.target.value)}
-                    placeholder="5"
-                    min="1"
-                    max="10"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="exercise">Exercise (minutes per day)</Label>
-                  <Input
-                    id="exercise"
-                    type="number"
-                    value={formData.exercise}
-                    onChange={(e) => handleInputChange('exercise', e.target.value)}
-                    placeholder="30"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="sleep_quality">Sleep Quality (Scale 1-10)</Label>
-                  <Input
-                    id="sleep_quality"
-                    type="number"
-                    value={formData.sleep_quality}
-                    onChange={(e) => handleInputChange('sleep_quality', e.target.value)}
-                    placeholder="7"
-                    min="1"
-                    max="10"
-                    required
-                  />
-                </div>
+      {/* Symptom Logging Form - Always Visible */}
+      <Card className="rounded-gentle">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5 text-primary" />
+            PCOD Assessment Form (Based on Your Dataset)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="age">Age</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  value={formData.Age}
+                  onChange={(e) => handleInputChange('Age', e.target.value)}
+                  placeholder="25"
+                  required
+                />
               </div>
               
-              <div className="flex gap-3 pt-4">
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="flex-1"
-                >
-                  {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Get PCOD Risk Assessment
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setShowForm(false)}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
+              <div className="space-y-2">
+                <Label htmlFor="bmi">BMI</Label>
+                <Input
+                  id="bmi"
+                  type="number"
+                  step="0.1"
+                  value={formData.BMI}
+                  onChange={(e) => handleInputChange('BMI', e.target.value)}
+                  placeholder="25.0"
+                  required
+                />
               </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="cyclelength">Cycle Length (days)</Label>
+                <Input
+                  id="cyclelength"
+                  type="number"
+                  value={formData.CycleLength}
+                  onChange={(e) => handleInputChange('CycleLength', e.target.value)}
+                  placeholder="28"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="acnedays">Acne Days (per month)</Label>
+                <Input
+                  id="acnedays"
+                  type="number"
+                  value={formData.AcneDays}
+                  onChange={(e) => handleInputChange('AcneDays', e.target.value)}
+                  placeholder="5"
+                  min="0"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="weightgain">Weight Gain (0=No, 1=Yes)</Label>
+                <Input
+                  id="weightgain"
+                  type="number"
+                  value={formData.WeightGain}
+                  onChange={(e) => handleInputChange('WeightGain', e.target.value)}
+                  placeholder="0"
+                  min="0"
+                  max="1"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="hormonelevel">Hormone Level</Label>
+                <Input
+                  id="hormonelevel"
+                  type="number"
+                  step="0.1"
+                  value={formData.HormoneLevel}
+                  onChange={(e) => handleInputChange('HormoneLevel', e.target.value)}
+                  placeholder="8.5"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="exercisetoday">Exercise Today (0=No, 1=Yes)</Label>
+                <Input
+                  id="exercisetoday"
+                  type="number"
+                  value={formData.ExerciseToday}
+                  onChange={(e) => handleInputChange('ExerciseToday', e.target.value)}
+                  placeholder="1"
+                  min="0"
+                  max="1"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="sleepquality">Sleep Quality (0=Poor, 1=Good)</Label>
+                <Input
+                  id="sleepquality"
+                  type="number"
+                  value={formData.SleepQuality}
+                  onChange={(e) => handleInputChange('SleepQuality', e.target.value)}
+                  placeholder="1"
+                  min="0"
+                  max="1"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 pt-4">
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                className="flex-1"
+              >
+                {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Get PCOD Severity Prediction
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Weekly Trends */}
       <Card className="rounded-gentle">

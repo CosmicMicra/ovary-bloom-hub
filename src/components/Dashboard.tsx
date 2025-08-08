@@ -49,6 +49,70 @@ export const Dashboard = () => {
     score: number;
   } | null>(null);
 
+  // Hardcoded tracking entries
+  const trackingHistory = [
+    {
+      id: 1,
+      date: "2024-01-08",
+      severityScore: 22,
+      acneDays: 1,
+      sleepQuality: 8,
+      exerciseMinutes: 45,
+      mood: 8,
+      weight: 64.5,
+      notes: "Feeling great today! Good sleep and morning yoga helped.",
+      symptoms: ["Mild bloating", "Good energy levels"]
+    },
+    {
+      id: 2,
+      date: "2024-01-07",
+      severityScore: 28,
+      acneDays: 2,
+      sleepQuality: 6,
+      exerciseMinutes: 30,
+      mood: 7,
+      weight: 65,
+      notes: "Slight hormonal changes noticed. Stayed hydrated.",
+      symptoms: ["Light cramping", "Slight mood swings"]
+    },
+    {
+      id: 3,
+      date: "2024-01-06",
+      severityScore: 18,
+      acneDays: 0,
+      sleepQuality: 9,
+      exerciseMinutes: 60,
+      mood: 9,
+      weight: 64.8,
+      notes: "Perfect day! Full workout and excellent sleep.",
+      symptoms: ["Clear skin", "High energy", "Positive mood"]
+    },
+    {
+      id: 4,
+      date: "2024-01-05",
+      severityScore: 35,
+      acneDays: 3,
+      sleepQuality: 5,
+      exerciseMinutes: 15,
+      mood: 6,
+      weight: 65.2,
+      notes: "Stressful work day. Late night affected sleep quality.",
+      symptoms: ["Increased acne", "Fatigue", "Stress eating"]
+    },
+    {
+      id: 5,
+      date: "2024-01-04",
+      severityScore: 25,
+      acneDays: 1,
+      sleepQuality: 7,
+      exerciseMinutes: 40,
+      mood: 7,
+      weight: 65.1,
+      notes: "Regular day with balanced activities and good nutrition.",
+      symptoms: ["Minor skin breakout", "Stable mood", "Good appetite"]
+    }
+  ];
+
   // Calculate PCOD Severity Score (simplified algorithm)
   const calculateSeverityScore = () => {
     const acneScore = Math.max(0, 10 - symptoms.acneDays);
@@ -679,6 +743,73 @@ export const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">2 days this week</p>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tracking History */}
+      <Card className="rounded-gentle">
+        <CardHeader>
+          <CardTitle>Recent Tracking History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {trackingHistory.map((entry) => {
+              const entryBadge = getScoreBadge(entry.severityScore);
+              return (
+                <div key={entry.id} className="border rounded-soft p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-sm font-medium text-muted-foreground">
+                        {new Date(entry.date).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </div>
+                      <Badge variant={entryBadge.variant} className="rounded-soft">
+                        {entryBadge.label}
+                      </Badge>
+                      <span className={`font-bold ${getScoreColor(entry.severityScore)}`}>
+                        {entry.severityScore}%
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-secondary" />
+                      <span>{entry.acneDays} acne days</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Moon className="h-4 w-4 text-primary" />
+                      <span>{entry.sleepQuality}/10 sleep</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Dumbbell className="h-4 w-4 text-success" />
+                      <span>{entry.exerciseMinutes}min exercise</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Scale className="h-4 w-4 text-warning" />
+                      <span>{entry.weight}kg</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-primary" />
+                      <span>{entry.mood}/10 mood</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Symptoms:</strong> {entry.symptoms.join(', ')}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Notes:</strong> {entry.notes}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

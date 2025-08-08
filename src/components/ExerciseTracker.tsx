@@ -333,10 +333,3 @@ export const ExerciseTracker = () => {
     </div>
   );
 };
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};

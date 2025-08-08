@@ -287,8 +287,11 @@ export const MealPlans = () => {
 
                       {/* Actions */}
                       <div className="flex gap-2 pt-2">
-                        <Button size="sm" className="flex-1 rounded-soft">
+                        <Button 
+                          size="sm" 
+                          className="flex-1 rounded-soft"
                           onClick={() => openRecipeDialog(recipe)}
+                        >
                           <BookOpen className="h-3 w-3 mr-1" />
                           Get Recipe
                         </Button>
